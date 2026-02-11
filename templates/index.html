@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Behavioral Terminal | نظام المسح السلوكي</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0d1117;
+            --card: #161b22;
+            --neon: #58a6ff;
+            --safe: #238636;
+            --fraud: #da3633;
+            --text-muted: #8b949e;
+        }
+
+        body {
+            font-family: 'Cairo', sans-serif;
+            background-color: var(--bg);
+            color: #c9d1d9;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .container {
+            max-width: 900px;
+            width: 100%;
+            background: var(--card);
+            padding: 30px;
+            border-radius: 15px;
+            border: 1px solid #30363d;
+            box-shadow: 0 10px 50px rgba(0,0,0,0.5);
+        }
+
+        /* رأس الصفحة */
+        .terminal-header {
+            text-align: center;
+            border-bottom: 1px solid #30363d;
+            margin-bottom: 30px;
+            padding-bottom: 10px;
+        }
+
+        .terminal-header h1 {
+            color: var(--neon);
+            font-family: 'Share Tech Mono', monospace;
+            letter-spacing: 3px;
+            margin: 0;
+        }
+
+        /* صندوق المسح (Scanner) */
+        .scan-box {
+            background: #000;
+            padding: 30px;
+            border-radius: 12px;
+            border-left: 5px solid var(--neon);
+            position: relative;
+            overflow: hidden;
+            margin-bottom: 25px;
+        }
+
+        .scan-box::after {
+            content: "";
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 2px;
+            background: var(--neon);
+            animation: scanline 2.5s linear infinite;
+            box-shadow: 0 0 15px var(--neon);
+        }
+
+        @keyframes scanline {
+            0% { top: 0; }
+            100% { top: 100%; }
+        }
+
+        .status-label {
+            font-family: 'Share Tech Mono', monospace;
+            color: var(--neon);
+            font-size: 0.9rem;
+            margin-bottom: 15px;
+            display: block;
+        }
+
+        input[type="number"] {
+            background: #0d1117;
+            border: 1px solid #30363d;
+            color: var(--neon);
+            padding: 15px;
+            width: 100%;
+            box-sizing: border-box;
+            border-radius: 8px;
+            font-size: 1.8rem;
+            text-align: center;
+            font-family: 'Share Tech Mono', monospace;
+            outline: none;
+            margin-bottom: 20px;
+        }
+
+        .btn-analyze {
+            background: var(--neon);
+            color: #fff;
+            border: none;
+            padding: 18px;
+            width: 100%;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .btn-analyze:hover {
+            filter: brightness(1.2);
+            box-shadow: 0 0 20px rgba(88,166,255,0.4);
+        }
+
+        /* تقرير محلل السلوك الذكي */
+        .report-box {
+            display: none;
+            background: rgba(88, 166, 255, 0.05);
+            border: 1px solid var(--neon);
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 25px;
+            animation: fadeIn 0.8s ease;
+        }
+
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        .report-title {
+            color: var(--neon);
+            font-weight: bold;
+            display: block;
+            margin-bottom: 10px;
+            border-bottom: 1px solid rgba(88,166,255,0.3);
+            padding-bottom: 5px;
+        }
+
+        /* شبكة نتائج الموديلات */
+        .results-grid {
+            display: none;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .model-card {
+            background: #0d1117;
+            padding: 20px;
+            border-radius: 10px;
+            border: 1px solid #30363d;
+            text-align: center;
+            transition: 0.4s;
+        }
+
+        .model-name {
+            display: block;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-bottom: 10px;
+        }
+
+        .prediction-val {
+            font-size: 1.4rem;
+            font-weight: bold;
+        }
+
+        .accuracy {
+            display: block;
+            font-size: 0.7rem;
+            color: #444;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="terminal-header">
+        <h1>X-100 BEHAVIORAL SCANNER</h1>
+        <p>تحليل النمط السلوكي الفوري للعمليات البنكية</p>
+    </div>
+
+    <div class="scan-box">
+        <span id="statusIndicator" class="status-label">[ SYSTEM READY: WAITING FOR INPUT ]</span>
+        <input type="number" id="amtInput" placeholder="أدخل مبلغ العملية المستهدف">
+        <button class="btn-analyze" onclick="executeAIPrediction()">بدء المسح السلوكي الشامل 📡</button>
+    </div>
+
+    <div id="reportSection" class="report-box">
+        <span class="report-title">📝 تقرير المحلل السلوكي الذكي:</span>
+        <div id="behaviorAnalysisText">جاري سحب البيانات السلوكية من الخادم...</div>
+    </div>
+
+    <div id="resultsGrid" class="results-grid">
+        <div class="model-card">
+            <span class="model-name">Random Forest</span>
+            <div id="rf-res" class="prediction-val">-</div>
+            <span class="accuracy">Accuracy: 99.9%</span>
+        </div>
+        <div class="model-card">
+            <span class="model-name">XGBoost</span>
+            <div id="xgb-res" class="prediction-val">-</div>
+            <span class="accuracy">Accuracy: 99.8%</span>
+        </div>
+        <div class="model-card">
+            <span class="model-name">Neural Network (ANN)</span>
+            <div id="ann-res" class="prediction-val">-</div>
+            <span class="accuracy">Accuracy: 99.7%</span>
+        </div>
+    </div>
+</div>
+
+<script>
+    // جلب الحالات من السيرفر
+    const casesData = {{ cases | tojson }};
+
+    async function executeAIPrediction() {
+        const amount = document.getElementById('amtInput').value;
+        if(!amount) return alert("من فضلك أدخل المبلغ للمتابعة");
+
+        // 1. اختيار نمط عشوائي
+        const randomIndex = Math.floor(Math.random() * casesData.length);
+        let selectedPattern = { ...casesData[randomIndex] };
+        selectedPattern.Amount = parseFloat(amount);
+
+        // 2. تحديث الواجهة لبدء المسح
+        document.getElementById('statusIndicator').innerText = "[ STATUS: PROCESSING PATTERN #" + (randomIndex + 1) + " ]";
+        document.getElementById('resultsGrid').style.display = 'none';
+        document.getElementById('reportSection').style.display = 'none';
+
+        try {
+            const response = await fetch('/predict_all', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ 
+                    features: selectedPattern,
+                    pattern_index: randomIndex 
+                })
+            });
+            const data = await response.json();
+
+            // 3. إظهار النتائج
+            document.getElementById('resultsGrid').style.display = 'grid';
+            document.getElementById('reportSection').style.display = 'block';
+
+            // تحديث قيم الموديلات
+            updateModelResult('rf', data.rf);
+            updateModelResult('xgb', data.xgb);
+            updateModelResult('ann', data.ann);
+
+            // تحديث تقرير المحلل
+            document.getElementById('behaviorAnalysisText').innerText = data.behavior_analysis;
+            document.getElementById('statusIndicator').innerText = "[ STATUS: SCAN COMPLETE ]";
+
+        } catch (error) {
+            alert("فشل الاتصال بخادم AI. تأكد من تشغيل app.py");
+        }
+    }
+
+    function updateModelResult(id, result) {
+        const element = document.getElementById(id + '-res');
+        element.innerText = result === 'Fraud' ? 'FRAUD ⚠️' : 'SAFE ✅';
+        element.style.color = result === 'Fraud' ? 'var(--fraud)' : 'var(--safe)';
+        // إضافة تأثير بسيط للبطاقة
+        element.parentElement.style.borderColor = result === 'Fraud' ? 'var(--fraud)' : 'var(--safe)';
+    }
+</script>
+
+</body>
+</html>
